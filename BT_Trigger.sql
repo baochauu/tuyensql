@@ -383,28 +383,33 @@ do
    
 
 
--- bảo châu
+-- Bảo Châu
 
---Tạo 1 trigger khi cập nhật bảng CUSTOMERS sau khi cập nhật MaKH từ bảng ORDERS 
-create trigger tr_MaKhachHang on CUSTOMERS 
-after update 
+--Tạo 1 trigger ngăn cập nhật khách hàng ở địa chỉ Đà Nẵng 
+ALTER trigger tr_MaKhachHang on CUSTOMERS 
+after update  
 as
 begin 
-	declare @nMaKH Nvarchar(10)
-	select @nMaKH = MaKH from inserted
-
-	declare @oMaKH Nvarchar(10)
-	select @oMaKH = MaKH from deleted 
-
-	update ORDERS set MaKH = @nMaKH 
-		where MaKH = @oMaKH 
-rollback transaction 
+	if exists (select * from deleted where DiaChi = 'Da Nang')
+	begin
+		rollback
+		print 'Khong the cap nhat thong tin cua khach hang o Da Nang'
+		return
+	end
 end 
---Event: thêm    sản phẩm thực hiện sau thời gian 5 phút sau khi sự kiện được tạo.
-CREATE EVENT event_xoasp
-ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 5 MINUTE
+
+UPDATE CUSTOMERS set DiaChi = 'Quang Nam'
+WHERE DiaChi = 'Nha Trang'
+
+UPDATE CUSTOMERS set DiaChi = 'Quang Nam'
+WHERE DiaChi = 'Da Nang'
+
+--Event: thêm sản phẩm thực hiện sau thời gian 1 phút sau khi sự kiện được tạo.
+CREATE EVENT event_themsp
+ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 MINUTE
 ON COMPLETION PRESERVE
 DO
+
 INSERT INTO PRODUCTS 
 VALUES ('SP008','Banh my','Banh my trung',15000,10)
 
