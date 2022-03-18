@@ -411,7 +411,7 @@ do
    
 
 
--- bảo châu
+-- Bảo Châu 
 
 --Tạo 1 trigger khi cập nhật bảng CUSTOMERS sau khi cập nhật MaKH từ bảng ORDERS 
 create trigger tr_MaKhachHang on CUSTOMERS 
@@ -428,9 +428,10 @@ begin
 		where MaKH = @oMaKH 
 rollback transaction 
 end 
---Event: thêm    sản phẩm thực hiện sau thời gian 5 phút sau khi sự kiện được tạo.
+
+--Event: thêm sản phẩm thực hiện sau thời gian 10 giây sau khi sự kiện được tạo.
 CREATE EVENT event_xoasp
-ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 5 MINUTE
+ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 10 SECOND
 ON COMPLETION PRESERVE
 DO
 INSERT INTO PRODUCTS 
