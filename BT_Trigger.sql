@@ -211,13 +211,13 @@ CREATE EVENT IF NOT EXISTS test_event_01
 ON SCHEDULE AT CURRENT_TIMESTAMP
 ON COMPLETION PRESERVE
 DO
-DO
+
 
   delete from products
   where SoLuong < 12 and TenSP = 'Banh my'
   
 
-  select * from  products
+
  
 
 
