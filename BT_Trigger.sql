@@ -266,48 +266,20 @@ SELECT c.* FROM dbo.CUSTOMERS c
 
 
 --Như thủy 
-/*tạo trigger kiểm tra Cho sự kiện thêm mới nhiều bản ghi trên bảng ORDER_DETAIL, số lượng phải lớn hơn 
-0, số lượng mua phải nhỏ hơn số lượng còn trong kho, cập nhật giảm tương ứng số lượng hàng còn trong bảng PRODUCTS  */
-
-CREATE TRIGGER Trigger_Check
-ON ORDER_DETAIL
-FOR INSERT
-AS
+/* cập nhật hàng trong kho sau khi hủy đặt hàng */
+create TRIGGER trg_HuyDatHang 
+ON  ORDER_DETAIL
+FOR DELETE AS 
 BEGIN
-		DECLARE @sl int, @thanhtien int, @madh  nvarchar(10),
-		 @masp nvarchar(10), @gsp int, @slc int
-		SELECT @sl = SLuongSPM, @thanhtien = ThanhTien , @madh= MaDH , @masp= MaSP
-		FROM inserted 
-
-
-		select @gsp=GiaSP from PRODUCTS where @masp= MaSP
-
-		select @slc=SoLuong from PRODUCTS where @masp= MaSP
-
-
-		IF( @sl < 0  )
-		BEGIN
-			PRINT N'Số lượng âm không thỏa điều kiện'
-			ROLLBACK TRANSACTION
-		END
-
-		else IF(  @slc < @sl )
-		BEGIN
-			PRINT N'Số lượng còn nhỏ hơn số lượng mua'
-			ROLLBACK TRANSACTION
-		END
-		else update PRODUCTS set SoLuong= (@slc-@sl) where @masp= MaSP
-	
+	DECLARE @sl int, @masp nvarchar(10)
+	SELECT @sl = SLuongSPM, @masp= MaSP FROM deleted
+	UPDATE PRODUCTS SET SoLuong = SoLuong + @sl 
+			where MaSP = @masp
 END
-GO
-drop trigger Trigger_Check
 
-INSERT INTO ORDER_DETAIL (MaDH_detail,MaDH,MaSP,SLuongSPM,ThanhTien)
-VALUES ('002','DH002','SP003',-3,10000)
-
-INSERT INTO ORDER_DETAIL (MaDH_detail,MaDH,MaSP,SLuongSPM,ThanhTien)
-VALUES ('002','DH004','SP003',55,30000)
-select * from PRODUCTS
+select *from PRODUCTS where MaSP ='SP002'
+delete ORDER_DETAIL where MaDH_detail= '001'
+select *from PRODUCTS where MaSP ='SP002'
 /* tạo event khuyến mãi giảm 25% tổng tiền trong bảng orders đối với các phương thức thanh toán ngoại trừ thanh toán khi nhân hàng */
 
 CREATE EVENT Khuyenmai2 
